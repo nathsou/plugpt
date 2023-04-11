@@ -1,6 +1,8 @@
 
 # PluGPT
 
+[Click here to launch](https://nathsou.github.io/plugpt/)
+
 Extendable chat interface for OpenAI's GPT chat models with support for custom plugins.
 
 ## Default Plugins
