@@ -1,0 +1,10 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body, #root {
+    height: 100%; /* Set the height to 100% of the viewport */
+    width: 100%; /* Set the width to 100% of the viewport */
+}
