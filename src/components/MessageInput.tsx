@@ -23,7 +23,6 @@ export const MessageInput = () => {
         const prompts = plugins.getPrompts();
         const completion = await openai.createChatCompletion({
             model: globalContext.model,
-            max_tokens: 2000,
             temperature: 0.1,
             messages: [
                 ...prompts,

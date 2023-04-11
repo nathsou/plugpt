@@ -8,7 +8,7 @@ export type GPTPluginRenderResultProps<State> = {
     state: State,
 };
 
-export type GPTPlutinRenderSettingsProps<State> = {
+export type GPTPluginRenderSettingsProps<State> = {
     state: State,
     setState: (state: State) => void,
 };
@@ -26,7 +26,7 @@ export type GPTPlugin<State extends Record<string, any> = Record<string, any>> =
     initialState: State,
     run: (context: { query: string, question: string }, state: State) => Promise<string>,
     renderResult?: (props: GPTPluginRenderResultProps<State>) => JSX.Element,
-    renderSettings?: (props: GPTPlutinRenderSettingsProps<State>) => JSX.Element,
+    renderSettings?: (props: GPTPluginRenderSettingsProps<State>) => JSX.Element,
 };
 
 export const plugins = new class {
