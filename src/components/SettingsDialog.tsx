@@ -1,4 +1,4 @@
-import { Alert, Button, ChevronDownIcon, Dialog, Pane, SelectMenu, Tab, Tablist, TextInputField, majorScale } from "evergreen-ui";
+import { Alert, Button, Card, ChevronDownIcon, Dialog, Heading, Pane, SelectMenu, Tab, Tablist, Text, TextInputField, majorScale } from "evergreen-ui";
 import { FC, useMemo, useState } from "react";
 import { plugins } from "../plugins/plugin";
 import { useStore } from "../store";
@@ -43,10 +43,39 @@ const PluginSettings = () => {
                 options={options}
                 selected={pluginId}
                 onSelect={(item) => setPluginId(item.value as string)}
+                closeOnSelect={true}
             >
                 <Button iconAfter={ChevronDownIcon}>{plugin?.name ?? 'Select Plugin'}</Button>
             </SelectMenu>
             <Pane marginTop={majorScale(2)}>
+                {plugin != null ? (
+                    <Card
+                        display="flex"
+                        flexDirection="row"
+                        width="100%"
+                        border="1px solid #c1c4d6"
+                        padding={majorScale(1)}
+                        marginBottom={majorScale(2)}
+                        background="tint1"
+                        justifyContent="space-evenly"
+                    >
+                        <Card display="flex" flexDirection="column">
+                            <Text fontWeight={600}>Identifier</Text>
+                            <Text marginY={majorScale(1)}>{plugin.id}</Text>
+                        </Card>
+
+                        <Card display="flex" flexDirection="column">
+                            <Text fontWeight={600}>Description</Text>
+                            <Text marginY={majorScale(1)}>{plugin.humanDescription ?? plugin.aiDescription}</Text>
+                        </Card>
+
+                        <Card display="flex" flexDirection="column">
+                            <Text fontWeight={600}>Command</Text>
+                            <Text marginY={majorScale(1)}>@{plugin.command}</Text>
+                        </Card>
+                    </Card>
+                ) : null}
+
                 {plugin?.renderSettings != null ? plugin.renderSettings({
                     state: pluginsState[plugin.id] ?? {},
                     setState: (state) => setPluginState(plugin.id, state),
@@ -64,19 +93,21 @@ export const SettingsDialog: FC = () => {
     const isShown = useStore(state => state.isParametersDialogOpen || state.OPENAI_API_KEY === '');
     const setIsParametersDialogOpen = useStore(state => state.setIsParametersDialogOpen);
     const [selectedIndex, setSelectedIndex] = useState(0);
+    const canClose = apiKey !== '';
 
     return (
         <Dialog
             isShown={isShown}
             title="Parameters"
             confirmLabel="Ok"
-            isConfirmDisabled={apiKey === ''}
-            hasClose={false}
+            isConfirmDisabled={!canClose}
+            hasClose={canClose}
             hasCancel={false}
             hasFooter={true}
             onConfirm={() => setIsParametersDialogOpen(false)}
-            shouldCloseOnOverlayClick={false}
-            shouldCloseOnEscapePress={false}
+            onCloseComplete={() => setIsParametersDialogOpen(false)}
+            shouldCloseOnOverlayClick={canClose}
+            shouldCloseOnEscapePress={canClose}
         >
             <Pane>
                 <Tablist marginBottom={majorScale(2)} flexBasis={240}>

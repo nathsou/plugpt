@@ -51,7 +51,8 @@ function evaluateCode(code: string): Promise<string> {
         const workerSource = dedent`
             self.onmessage = (e) => {
                 const f = ${code};
-                postMessage(JSON.stringify({ type: "result", value: f() }));
+                const value = typeof f === 'function' ? f() : f;
+                postMessage(JSON.stringify({ type: 'result', value }));
             };
       `;
 

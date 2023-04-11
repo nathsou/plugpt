@@ -61,9 +61,9 @@ export const MessageInput = () => {
                 border="none"
                 placeholder="Send a message..."
             />
-            <Pane display="flex" flexDirection="column" justifyContent="space-around" margin={minorScale(1)}>
+            <Pane display="flex" flexDirection="column" justifyContent="space-between" margin={minorScale(1)}>
                 <IconButton icon={WrenchIcon} onClick={() => setIsParametersDialogOpen(true)} />
-                {isLoading ? <Spinner size={majorScale(2)} /> : <IconButton icon={SendMessageIcon} onClick={onSendMessage} />}
+                {isLoading ? <Spinner size={majorScale(4)} /> : <IconButton icon={SendMessageIcon} onClick={onSendMessage} />}
             </Pane>
         </>
     );
