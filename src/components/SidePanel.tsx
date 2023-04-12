@@ -1,7 +1,6 @@
 import { Button, Card, IconButton, Pane, PlusIcon, Text, TrashIcon, majorScale } from "evergreen-ui";
 import { FC, useState } from "react";
 import { Conversation, useStore } from "../store";
-import { useMediaQuery } from 'usehooks-ts';
 
 const ConversationItem: FC<{ conversation: Conversation }> = ({ conversation }) => {
     const setConversationUuid = useStore(state => state.setConversationUuid);
@@ -40,11 +39,6 @@ const ConversationItem: FC<{ conversation: Conversation }> = ({ conversation }) 
 export const SidePanel = () => {
     const conversations = useStore(state => state.conversations);
     const addConversation = useStore(state => state.addConversation);
-    const isSmallScreen = useMediaQuery('(max-width: 768px)');
-
-    if (isSmallScreen) {
-        return null;
-    }
 
     return (
         <Pane

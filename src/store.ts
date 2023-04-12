@@ -44,6 +44,8 @@ type State = {
     nextConversationIndex: number,
     conversations: Conversation[],
     isParametersDialogOpen: boolean,
+    temperature: number,
+    isSidePanelOpen: boolean,
 };
 
 type Actions = {
@@ -57,6 +59,8 @@ type Actions = {
     removeConversation: (uuid: string) => void,
     setConversationUuid: (uuid: string) => void,
     updateSubstitutions: (conversationUuid: string, messageUuid: string, substitutions: PluginSubstitution[]) => void,
+    setTemperature: (temperature: number) => void,
+    setIsSidePanelOpen: (isOpen: boolean) => void,
 };
 
 export type Store = State & Actions;
@@ -81,6 +85,8 @@ export const useStore = create<Store>()(immer(persist(set => {
             messages: [] as ConversationMessage[],
         }],
         isParametersDialogOpen: false,
+        temperature: 0.4,
+        isSidePanelOpen: false,
         setOpenAIKey: key => set(state => {
             state.OPENAI_API_KEY = key;
         }),
@@ -163,6 +169,8 @@ export const useStore = create<Store>()(immer(persist(set => {
                 }
             }
         }),
+        setTemperature: temperature => set({ temperature }),
+        setIsSidePanelOpen: isOpen => set({ isSidePanelOpen: isOpen }),
     };
 }, {
     name: 'pugpt',

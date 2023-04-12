@@ -107,22 +107,26 @@ export const Message: FC<Props> = ({ message }) => {
             display="flex"
             onPointerEnter={() => setIsHovered(true)}
             onPointerLeave={() => setIsHovered(false)}
+            justifyContent="center"
         >
-            <Avatar
-                name={type === 'question' ? 'Mel Enderson' : 'Alan Isaac'}
-                color={type === 'question' ? 'orange' : 'blue'}
-                marginRight={majorScale(1)}
-            />
-            <Pane flex={1} color="#101840" whiteSpace="pre-wrap">
-                {body}
+            <Pane display="flex" flexBasis="60rem" flexGrow={0}>
+                <Avatar
+                    name={type === 'question' ? 'Mel Enderson' : 'Alan Isaac'}
+                    color={type === 'question' ? 'orange' : 'blue'}
+                    marginRight={majorScale(1)}
+                />
+                <Pane flex={1} color="#101840" whiteSpace="pre-wrap" >
+                    {body}
+                </Pane>
+                {isHovered && type === 'question' ?
+                    <IconButton
+                        icon={TrashIcon}
+                        size="small"
+                        onClick={() => removeMessage(conversationUuid, message.uuid)}
+                    /> :
+                    null
+                }
             </Pane>
-            {isHovered && type === 'question' ?
-                <IconButton
-                    icon={TrashIcon}
-                    size="small"
-                    onClick={() => removeMessage(conversationUuid, message.uuid)}
-                /> :
-                null}
         </Card>
     );
 };

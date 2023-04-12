@@ -1,11 +1,13 @@
-import { Alert, Button, Card, ChevronDownIcon, Dialog, Heading, Pane, SelectMenu, Tab, Tablist, Text, TextInputField, majorScale } from "evergreen-ui";
+import { Alert, Button, Card, ChevronDownIcon, Dialog, Icon, InfoSignIcon, Link, Pane, Pill, SelectMenu, Tab, Tablist, Text, TextInputField, Tooltip, majorScale, minorScale } from "evergreen-ui";
 import { FC, useMemo, useState } from "react";
 import { plugins } from "../plugins/plugin";
 import { useStore } from "../store";
 
 const GlobalSettings = () => {
     const apiKey = useStore(state => state.OPENAI_API_KEY);
+    const temperature = useStore(state => state.temperature);
     const setOpenAIKey = useStore(state => state.setOpenAIKey);
+    const setTemperature = useStore(state => state.setTemperature);
 
     return (
         <Pane>
@@ -21,6 +23,26 @@ const GlobalSettings = () => {
                 type="password"
                 label="OpenAI API Key"
             />
+            <Text>You can find or create your OpenAI API key</Text>
+            <Link marginLeft={minorScale(1)} href="https://platform.openai.com/account/api-keys" target="_blank">here</Link>
+
+            <Card display="flex" flexDirection="column" marginY={majorScale(2)}>
+                <Text fontWeight={600}>Temperature</Text>
+                <Text>Adjusts output randomness</Text>
+                <Pane display="flex" width="100%">
+                    <input
+                        value={temperature}
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.01"
+                        onChange={e => setTemperature(Number(e.target.value))}
+                    />
+                    <Pill display="inline-flex" margin={8}>
+                        {temperature}
+                    </Pill>
+                </Pane>
+            </Card>
         </Pane>
     );
 };
@@ -98,7 +120,7 @@ export const SettingsDialog: FC = () => {
     return (
         <Dialog
             isShown={isShown}
-            title="Parameters"
+            title="Settings"
             confirmLabel="Ok"
             isConfirmDisabled={!canClose}
             hasClose={canClose}
@@ -122,7 +144,12 @@ export const SettingsDialog: FC = () => {
                         </Tab>
                     ))}
                 </Tablist>
-                <Pane padding={majorScale(2)} background="tint2" flex="1" borderRadius={majorScale(1)}>
+                <Pane
+                    padding={majorScale(2)}
+                    background="tint2"
+                    flex="1"
+                    borderRadius={majorScale(1)}
+                >
                     {tabNames.map((tab, index) => (
                         <Pane
                             aria-labelledby={tab}
