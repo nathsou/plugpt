@@ -30,7 +30,6 @@ export const fetchPlugin: GPTPlugin = {
         const { openai, model } = globalContext;
         const completion = await openai.createChatCompletion({
             model,
-            max_tokens: 2000,
             temperature: 0.1,
             messages: [
                 {

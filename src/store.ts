@@ -6,6 +6,7 @@ import { fetchPlugin } from './plugins/fetchPlugin';
 import { googlePlugin } from './plugins/googlePlugin';
 import { jsPlugin } from './plugins/jsPlugin';
 import { GPTPluginState, plugins } from './plugins/plugin';
+import { globalContext } from './OpenAIProvider';
 
 type QuestionMessage = {
     type: 'question',
@@ -34,11 +35,13 @@ export type ConversationMessage = {
 export type Conversation = {
     uuid: string,
     title: string,
+    summary?: string,
     messages: ConversationMessage[],
 };
 
 type State = {
     OPENAI_API_KEY: string,
+    model: string,
     plugins: Record<string, GPTPluginState>,
     conversationUuid: string,
     nextConversationIndex: number,
@@ -61,6 +64,8 @@ type Actions = {
     updateSubstitutions: (conversationUuid: string, messageUuid: string, substitutions: PluginSubstitution[]) => void,
     setTemperature: (temperature: number) => void,
     setIsSidePanelOpen: (isOpen: boolean) => void,
+    setModel: (model: string) => void,
+    setConversationSummary: (conversationUuid: string, summary: string) => void,
 };
 
 export type Store = State & Actions;
@@ -74,6 +79,7 @@ export const useStore = create<Store>()(immer(persist(set => {
 
     return {
         OPENAI_API_KEY: '',
+        model: 'gpt-3.5-turbo',
         plugins: Object.fromEntries(
             plugins.getPlugins().map(plugin => [plugin.id, plugin.initialState])
         ),
@@ -171,6 +177,14 @@ export const useStore = create<Store>()(immer(persist(set => {
         }),
         setTemperature: temperature => set({ temperature }),
         setIsSidePanelOpen: isOpen => set({ isSidePanelOpen: isOpen }),
+        setModel: model => set(state => {
+            state.model = model;
+            globalContext.model = model;
+        }),
+        setConversationSummary: (conversationUuid, summary) => set(({ conversations }) => {
+            const conversationIndex = conversations.findIndex(c => c.uuid === conversationUuid);
+            conversations[conversationIndex].summary = summary;
+        }),
     };
 }, {
     name: 'pugpt',

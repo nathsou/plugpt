@@ -22,7 +22,9 @@ const ConversationItem: FC<{ conversation: Conversation }> = ({ conversation }) 
             onPointerEnter={() => setIsHovered(true)}
             onPointerLeave={() => setIsHovered(false)}
         >
-            <Text fontSize="1rem" flex={1} textAlign="center">{conversation.title}</Text>
+            <Text fontSize="1rem" flex={1} textAlign="center">
+                {conversation.summary ?? conversation.title}
+            </Text>
             {isHovered && <IconButton
                 icon={TrashIcon}
                 size="small"

@@ -1,12 +1,12 @@
-import { Alert, Button, Card, ChevronDownIcon, Dialog, Link, Pane, Pill, SelectMenu, Switch, Tab, Tablist, Text, TextInputField, majorScale, minorScale } from "evergreen-ui";
+import { Alert, Button, Card, ChevronDownIcon, Dialog, Link, Pane, Pill, Select, SelectMenu, Switch, Tab, Tablist, Text, TextInputField, majorScale, minorScale } from "evergreen-ui";
 import { FC, useMemo, useState } from "react";
 import { plugins } from "../plugins/plugin";
 import { useStore } from "../store";
 
 const GlobalSettings = () => {
-    const apiKey = useStore(state => state.OPENAI_API_KEY);
+    const [apiKey, setApiKey] = useStore(state => [state.OPENAI_API_KEY, state.setOpenAIKey]);
+    const [model, setModel] = useStore(state => [state.model, state.setModel]);
     const temperature = useStore(state => state.temperature);
-    const setOpenAIKey = useStore(state => state.setOpenAIKey);
     const setTemperature = useStore(state => state.setTemperature);
 
     return (
@@ -19,15 +19,15 @@ const GlobalSettings = () => {
             <TextInputField
                 placeholder="OpenAI API Key"
                 defaultValue={apiKey}
-                onChange={(e: any) => setOpenAIKey(e.target.value)}
+                onChange={(e: any) => setApiKey(e.target.value)}
                 type="password"
                 label="OpenAI API Key"
             />
             <Text>You can find or create your OpenAI API key</Text>
             <Link marginLeft={minorScale(1)} href="https://platform.openai.com/account/api-keys" target="_blank">here</Link>
 
-            <Card display="flex" flexDirection="column" marginY={majorScale(2)}>
-                <Text fontWeight={600}>Temperature</Text>
+            <Card display="flex" flexDirection="column">
+                <Text fontWeight={600} marginY={majorScale(1)}>Temperature</Text>
                 <Text>Adjusts output randomness</Text>
                 <Pane display="flex" width="100%">
                     <input
@@ -36,12 +36,18 @@ const GlobalSettings = () => {
                         min="0"
                         max="1"
                         step="0.01"
-                        onChange={e => setTemperature(Number(e.target.value))}
+                        onChange={event => setTemperature(Number(event.target.value))}
                     />
                     <Pill display="inline-flex" margin={8}>
                         {temperature}
                     </Pill>
                 </Pane>
+
+                <Text fontWeight={600} marginY={majorScale(1)}>Model</Text>
+                <Select value={model} size="large" onChange={event => setModel(event.target.value)}>
+                    <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+                    <option value="gpt-4">gpt-4 (if available)</option>
+                </Select>
             </Card>
         </Pane>
     );

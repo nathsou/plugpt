@@ -14,6 +14,7 @@ export const MessageInput = () => {
     const conversation = useConversation();
     const setIsParametersDialogOpen = useStore(state => state.setIsParametersDialogOpen);
     const temperature = useStore(state => state.temperature);
+    const model = useStore(state => state.model);
     const pluginsState = useStore(state => state.plugins);
 
     const onKeyUp = useCallback((event: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -37,7 +38,7 @@ export const MessageInput = () => {
         );
         const prompts = plugins.getPrompts(enabledPlugins);
         const completion = await openai.createChatCompletion({
-            model: globalContext.model,
+            model,
             temperature,
             messages: [
                 ...prompts,
