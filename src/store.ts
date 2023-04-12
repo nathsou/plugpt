@@ -1,11 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { immer } from 'zustand/middleware/immer'
+import { immer } from 'zustand/middleware/immer';
 import { fetchPlugin } from './plugins/fetchPlugin';
 import { googlePlugin } from './plugins/googlePlugin';
 import { jsPlugin } from './plugins/jsPlugin';
-import { plugins } from './plugins/plugin';
+import { GPTPluginState, plugins } from './plugins/plugin';
 
 type QuestionMessage = {
     type: 'question',
@@ -39,7 +39,7 @@ export type Conversation = {
 
 type State = {
     OPENAI_API_KEY: string,
-    plugins: Record<string, Record<string, any>>,
+    plugins: Record<string, GPTPluginState>,
     conversationUuid: string,
     nextConversationIndex: number,
     conversations: Conversation[],
@@ -51,9 +51,9 @@ type State = {
 type Actions = {
     setOpenAIKey: (key: string) => void,
     setIsParametersDialogOpen: (isOpen: boolean) => void,
-    setPluginState: (pluginId: string, state: Record<string, any>) => void,
+    setPluginState: (pluginId: string, state: GPTPluginState) => void,
     addQuestion: (question: string) => void,
-    addAnswer: (answer: string, substitutions: PluginSubstitution[]) => void,
+    addAnswer: (conversationUuid: string, answer: string, substitutions: PluginSubstitution[]) => void,
     removeMessage: (conversationUuid: string, messageUuid: string) => void,
     addConversation: () => void,
     removeConversation: (uuid: string) => void,
@@ -105,7 +105,7 @@ export const useStore = create<Store>()(immer(persist(set => {
                 content: message,
             });
         }),
-        addAnswer: (answer, substitutions) => set(({ conversations, conversationUuid }) => {
+        addAnswer: (conversationUuid, answer, substitutions) => set(({ conversations }) => {
             const conversationIndex = conversations.findIndex(c => c.uuid === conversationUuid);
             conversations[conversationIndex].messages.push({
                 uuid: uuidv4(),

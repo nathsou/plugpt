@@ -2,7 +2,7 @@ import { Pane, SideSheet } from 'evergreen-ui';
 import "./styles/App.css";
 import { Conversation } from './components/Conversation';
 import { OpenAIProvider } from './OpenAIProvider';
-import { SidePanel } from './components/SidePanel';
+import { SidePanel } from './components/ConversationList';
 import { SettingsDialog } from './components/SettingsDialog';
 import { useIsSmallScreen } from './hooks/useIsSmallScreen';
 import { useStore } from './store';

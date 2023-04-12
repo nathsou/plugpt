@@ -13,7 +13,11 @@ export type GPTPluginRenderSettingsProps<State> = {
     setState: (state: State) => void,
 };
 
-export type GPTPlugin<State extends Record<string, any> = Record<string, any>> = {
+export type GPTPluginState = { enabled: boolean, [index: string]: any };
+
+export type GPTPlugin<
+    State extends GPTPluginState = GPTPluginState
+> = {
     id: string,
     name: string,
     command: string,
@@ -55,26 +59,29 @@ export const plugins = new class {
         return this.plugins.find(plugin => plugin.command === command);
     }
 
-    public getPrompts(): ChatCompletionRequestMessage[] {
-        const commands = this.plugins.map(({ command, aiDescription }) => dedent`
+    public getPrompts(enabledPlugins: Set<string>): ChatCompletionRequestMessage[] {
+        const activePlugins = this.plugins.filter(plugin => enabledPlugins.has(plugin.id));
+        const commands = activePlugins.map(({ command, aiDescription }) => dedent`
             @${command}(<input>): ${aiDescription}
         `).join('\n');
 
-        const examples: ChatCompletionRequestMessage[] = this.plugins.flatMap(plugin => {
+        const examples: ChatCompletionRequestMessage[] = activePlugins.flatMap(plugin => {
             return plugin.examples.flatMap(example => [
                 { role: 'user', content: example.question },
                 { role: 'assistant', content: example.answer },
             ]);
         });
 
+        const prefix = `You are a helpful assistant, you answer questions in markdown.`;
+
         return [
             {
                 role: 'system',
-                content: dedent`
-                    You are a helpful assistant, you answer questions in markdown.
+                content: activePlugins.length > 0 ? dedent`
+                    ${prefix}
                     If needed, the following commands are available to answer questions:
                     ${commands}
-                `,
+                ` : prefix,
             },
             ...examples,
         ];
@@ -83,7 +90,7 @@ export const plugins = new class {
     public async runCommand(
         { command, query }: Command,
         question: string,
-        state: Record<string, any>,
+        state: GPTPluginState,
     ): Promise<{ pluginId: string, result: string }> {
         const plugin = this.getPluginByCommand(command);
 

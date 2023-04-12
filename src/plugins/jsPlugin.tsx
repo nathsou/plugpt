@@ -21,7 +21,7 @@ export const jsPlugin: GPTPlugin = {
             answer: `Today is the @JS(() => new Date().toLocaleDateString())`
         },
         {
-            question: 'Show an empty 600px by 800px pink rectangle',
+            question: 'Show an empty pink rectangle',
             answer: dedent`@JS(
                 () => {
                     const width = 400;
@@ -41,7 +41,7 @@ export const jsPlugin: GPTPlugin = {
             )`
         },
     ],
-    initialState: {},
+    initialState: { enabled: true },
     run: ({ query }) => evaluateCode(query),
     renderResult,
 };
@@ -58,7 +58,6 @@ function evaluateCode(code: string): Promise<string> {
 
         const workerBlob = new Blob([workerSource], { type: "text/javascript" });
         const workerBlobURL = URL.createObjectURL(workerBlob);
-
         const worker = new Worker(workerBlobURL);
 
         const timeOutTimer = setTimeout(() => {
@@ -70,8 +69,8 @@ function evaluateCode(code: string): Promise<string> {
 
         worker.postMessage('run');
         worker.onmessage = (e) => {
-            const result = JSON.parse(e.data);
             clearTimeout(timeOutTimer);
+            const result = JSON.parse(e.data);
             if (result.type === "result") {
                 resolve(result.value);
             } else {

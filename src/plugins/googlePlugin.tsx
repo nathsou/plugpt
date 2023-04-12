@@ -1,4 +1,4 @@
-import { Badge, Button, Card, SearchIcon, Text, TextInputField, majorScale } from "evergreen-ui";
+import { Badge, Button, Card, Link, SearchIcon, Text, TextInputField, majorScale } from "evergreen-ui";
 import ReactMarkdown from 'react-markdown';
 import dedent from "ts-dedent";
 import { globalContext } from "../OpenAIProvider";
@@ -7,6 +7,7 @@ import { GPTPlugin } from "./plugin";
 export type GooglePluginState = {
     key: string,
     cx: string,
+    enabled: boolean,
 };
 
 export const googlePlugin: GPTPlugin<GooglePluginState> = {
@@ -33,7 +34,7 @@ export const googlePlugin: GPTPlugin<GooglePluginState> = {
             answer: '@Google(Next SpaceX launch)',
         },
     ],
-    initialState: { key: '', cx: '' },
+    initialState: { enabled: false, key: '', cx: '' },
     run: async ({ query, question }, { key, cx }) => {
         const numResults = 10;
         const url = `https://www.googleapis.com/customsearch/v1?key=${key}&cx=${cx}&q=${query}&num=${numResults}`;
@@ -119,13 +120,35 @@ export const googlePlugin: GPTPlugin<GooglePluginState> = {
                     value={state.key}
                     onChange={(e: any) => setState({ ...state, key: e.target.value })}
                     type="password"
-                    label="Google Search API Key"
+                    label={
+                        <>
+                            <Text>Google Search API Key</Text>
+                            <Link
+                                marginLeft={majorScale(1)}
+                                target="_blank"
+                                href="https://developers.google.com/custom-search/v1/overview"
+                            >
+                                <Text color="blue">more info</Text>
+                            </Link>
+                        </>
+                    }
                 />
                 <TextInputField
                     value={state.cx}
                     onChange={(e: any) => setState({ ...state, cx: e.target.value })}
                     type="password"
-                    label="Google Search Engine ID"
+                    label={
+                        <>
+                            <Text>Google Search Engine ID</Text>
+                            <Link
+                                marginLeft={majorScale(1)}
+                                target="_blank"
+                                href="https://programmablesearchengine.google.com/controlpanel/all"
+                            >
+                                <Text color="blue">more info</Text>
+                            </Link>
+                        </>
+                    }
                 />
             </>
         );

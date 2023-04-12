@@ -23,7 +23,7 @@ export const fetchPlugin: GPTPlugin = {
             answer: '@Fetch(https://en.wikipedia.org/wiki/French_Revolution)',
         },
     ],
-    initialState: {},
+    initialState: { enabled: true },
     run: async ({ query: url, question }) => {
         const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
         const contents = (await response.json()).contents.slice(0, 5_000);

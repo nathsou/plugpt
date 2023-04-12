@@ -37,7 +37,7 @@ const ConversationItem: FC<{ conversation: Conversation }> = ({ conversation }) 
 };
 
 export const SidePanel = () => {
-    const conversations = useStore(state => state.conversations);
+    const conversations = useStore(state => [...state.conversations].reverse());
     const addConversation = useStore(state => state.addConversation);
 
     return (
@@ -48,9 +48,6 @@ export const SidePanel = () => {
             padding={majorScale(2)}
             overflowY="auto"
         >
-            {conversations.map(conversation => (
-                <ConversationItem key={conversation.uuid} conversation={conversation} />
-            ))}
             <Button
                 width="100%"
                 height="3rem"
@@ -60,6 +57,9 @@ export const SidePanel = () => {
             >
                 New chat
             </Button>
+            {conversations.map(conversation => (
+                <ConversationItem key={conversation.uuid} conversation={conversation} />
+            ))}
         </Pane>
     );
 };

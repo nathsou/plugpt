@@ -1,4 +1,4 @@
-import { Alert, Button, Card, ChevronDownIcon, Dialog, Icon, InfoSignIcon, Link, Pane, Pill, SelectMenu, Tab, Tablist, Text, TextInputField, Tooltip, majorScale, minorScale } from "evergreen-ui";
+import { Alert, Button, Card, ChevronDownIcon, Dialog, Link, Pane, Pill, SelectMenu, Switch, Tab, Tablist, Text, TextInputField, majorScale, minorScale } from "evergreen-ui";
 import { FC, useMemo, useState } from "react";
 import { plugins } from "../plugins/plugin";
 import { useStore } from "../store";
@@ -60,15 +60,30 @@ const PluginSettings = () => {
 
     return (
         <>
-            <SelectMenu
-                title="Select Plugin"
-                options={options}
-                selected={pluginId}
-                onSelect={(item) => setPluginId(item.value as string)}
-                closeOnSelect={true}
-            >
-                <Button iconAfter={ChevronDownIcon}>{plugin?.name ?? 'Select Plugin'}</Button>
-            </SelectMenu>
+            <Pane display="flex" alignItems="center">
+                <SelectMenu
+                    title="Select Plugin"
+                    options={options}
+                    selected={pluginId}
+                    onSelect={(item) => setPluginId(item.value as string)}
+                    closeOnSelect={true}
+                >
+                    <Button iconAfter={ChevronDownIcon}>{plugin?.name ?? 'Select Plugin'}</Button>
+                </SelectMenu>
+                {
+                    pluginId != null ? <>
+                        <Text marginLeft={majorScale(2)} marginRight={minorScale(1)}>Enabled</Text>
+                        <Switch
+                            checked={pluginsState[pluginId]?.enabled ?? false}
+                            onChange={() => {
+                                setPluginState(pluginId, { enabled: !pluginsState[pluginId]?.enabled });
+                            }}
+                        >
+                            Enabled
+                        </Switch>
+                    </> : null
+                }
+            </Pane>
             <Pane marginTop={majorScale(2)}>
                 {plugin != null ? (
                     <Card
@@ -99,7 +114,7 @@ const PluginSettings = () => {
                 ) : null}
 
                 {plugin?.renderSettings != null ? plugin.renderSettings({
-                    state: pluginsState[plugin.id] ?? {},
+                    state: pluginsState[plugin.id],
                     setState: (state) => setPluginState(plugin.id, state),
                 }) : null}
             </Pane>
