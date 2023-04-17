@@ -56,7 +56,8 @@ type Actions = {
     setIsParametersDialogOpen: (isOpen: boolean) => void,
     setPluginState: (pluginId: string, state: GPTPluginState) => void,
     addQuestion: (question: string) => void,
-    addAnswer: (conversationUuid: string, answer: string, substitutions: PluginSubstitution[]) => void,
+    addAnswer: (conversationUuid: string, messageUuid: string, answer: string, substitutions: PluginSubstitution[]) => void,
+    updateMessage: (conversationUuid: string, messageUuid: string, conte: string) => void,
     removeMessage: (conversationUuid: string, messageUuid: string) => void,
     addConversation: () => void,
     removeConversation: (uuid: string) => void,
@@ -111,15 +112,25 @@ export const useStore = create<Store>()(immer(persist(set => {
                 content: message,
             });
         }),
-        addAnswer: (conversationUuid, answer, substitutions) => set(({ conversations }) => {
+        addAnswer: (conversationUuid, messageUuid, answer, substitutions) => set(({ conversations }) => {
             const conversationIndex = conversations.findIndex(c => c.uuid === conversationUuid);
             conversations[conversationIndex].messages.push({
-                uuid: uuidv4(),
+                uuid: messageUuid,
                 timestamp: Date.now(),
                 type: 'answer',
                 content: answer,
                 substitutions,
             });
+        }),
+        updateMessage: (conversationUuid, messageUuid, content) => set(({ conversations }) => {
+            const conversationIndex = conversations.findIndex(c => c.uuid === conversationUuid);
+            const conversation = conversations[conversationIndex];
+            const messages = conversation.messages;
+            const messageIndex = messages.findIndex(m => m.uuid === messageUuid);
+
+            if (conversationIndex >= 0 && messageIndex >= 0) {
+                messages[messageIndex].content = content;
+            }
         }),
         removeMessage: (conversationUuid, messageUuid) => set(({ conversations }) => {
             const conversationIndex = conversations.findIndex(c => c.uuid === conversationUuid);
@@ -153,7 +164,7 @@ export const useStore = create<Store>()(immer(persist(set => {
             if (state.conversations.length === 0) {
                 state.conversations.push({
                     uuid: uuidv4(),
-                    title: 'Conversation 1',
+                    title: `Conversation ${state.nextConversationIndex++}`,
                     messages: [],
                 });
             }
@@ -165,10 +176,10 @@ export const useStore = create<Store>()(immer(persist(set => {
         setConversationUuid: uuid => set({ conversationUuid: uuid }),
         updateSubstitutions: (conversationUuid, messageUuid, substitutions) => set(({ conversations }) => {
             const conversationIndex = conversations.findIndex(c => c.uuid === conversationUuid);
-            const messageIndex = conversations[conversationIndex].messages.findIndex(m => m.uuid === messageUuid);
+            const messages = conversations[conversationIndex].messages;
+            const messageIndex = messages.findIndex(m => m.uuid === messageUuid);
 
             if (conversationIndex >= 0 && messageIndex >= 0) {
-                const messages = conversations[conversationIndex].messages;
                 const message = messages[messageIndex];
                 if (message.type === 'answer') {
                     message.substitutions = substitutions;

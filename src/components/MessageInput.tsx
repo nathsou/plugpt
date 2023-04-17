@@ -1,21 +1,24 @@
 import { IconButton, Pane, SendMessageIcon, Spinner, Textarea, WrenchIcon, majorScale, minorScale } from 'evergreen-ui';
 import { ChatCompletionRequestMessage } from 'openai';
 import { ChangeEvent, KeyboardEvent, useCallback, useState } from 'react';
-import { globalContext, useOpenAI } from '../OpenAIProvider';
+import { v4 as uuidv4 } from 'uuid';
 import { parse, plugins } from '../plugins/plugin';
+import { SSE } from '../sse';
 import { PluginSubstitution, useConversation, useStore } from '../store';
 
 export const MessageInput = () => {
-    const openai = useOpenAI();
+    const OPENAI_API_KEY = useStore(state => state.OPENAI_API_KEY);
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
     const addQuestion = useStore(state => state.addQuestion);
     const addAnswer = useStore(state => state.addAnswer);
+    const updateMessage = useStore(state => state.updateMessage);
     const conversation = useConversation();
     const setIsParametersDialogOpen = useStore(state => state.setIsParametersDialogOpen);
     const temperature = useStore(state => state.temperature);
     const model = useStore(state => state.model);
     const pluginsState = useStore(state => state.plugins);
+    const updateSubstitutions = useStore(state => state.updateSubstitutions);
 
     const onKeyUp = useCallback((event: KeyboardEvent<HTMLTextAreaElement>) => {
         if (event.key === 'Enter' && !event.shiftKey) {
@@ -29,6 +32,8 @@ export const MessageInput = () => {
         const question = message;
         addQuestion(message);
         setMessage('');
+        const answerUuid = uuidv4();
+        addAnswer(conversation.uuid, answerUuid, '', []);
 
         const enabledPlugins = new Set(
             Object
@@ -36,21 +41,53 @@ export const MessageInput = () => {
                 .filter(([_, state]) => state.enabled)
                 .map(([id]) => id)
         );
+
         const prompts = plugins.getPrompts(enabledPlugins);
-        const completion = await openai.createChatCompletion({
-            model,
-            temperature,
-            messages: [
-                ...prompts,
-                ...conversation.messages.map<ChatCompletionRequestMessage>(message => ({
-                    role: message.type === 'question' ? 'user' : 'assistant',
-                    content: message.content
-                })),
-                { role: 'user', content: question },
-            ],
+        const answer = await new Promise<string>((resolve, _reject) => {
+            const completion = new SSE("https://api.openai.com/v1/chat/completions", {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${OPENAI_API_KEY}`,
+                },
+                method: "POST",
+                payload: JSON.stringify({
+                    model,
+                    temperature,
+                    stream: true,
+                    messages: [
+                        ...prompts,
+                        ...conversation.messages.map<ChatCompletionRequestMessage>(message => ({
+                            role: message.type === 'question' ? 'user' : 'assistant',
+                            content: message.content
+                        })),
+                        { role: 'user', content: question },
+                    ],
+                }),
+            });
+
+            let message = '';
+
+            const onMessage = (event: any) => {
+                if (event.data === "[DONE]") {
+                    completion.close();
+                    completion.removeEventListener('message', onMessage);
+                    resolve(message);
+                } else {
+                    const payload = JSON.parse(event.data);
+                    const delta = payload.choices[0].delta;
+
+                    if ("content" in delta) {
+                        message += delta.content;
+                    }
+
+                    updateMessage(conversation.uuid, answerUuid, message);
+                }
+            };
+
+            completion.addEventListener('message', onMessage);
+            completion.stream();
         });
 
-        const answer = completion.data.choices[0].message?.content ?? '';
         const commands = parse(answer);
         const substitutions: PluginSubstitution[] = commands.map(command => {
             const plugin = plugins.getPluginByCommand(command.command)!;
@@ -63,7 +100,7 @@ export const MessageInput = () => {
             };
         });
 
-        addAnswer(conversation.uuid, answer, substitutions);
+        updateSubstitutions(conversation.uuid, answerUuid, substitutions);
         setIsLoading(false);
     };
 

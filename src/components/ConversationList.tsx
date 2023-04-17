@@ -21,6 +21,9 @@ const ConversationItem: FC<{ conversation: Conversation }> = ({ conversation }) 
             onClick={() => setConversationUuid(conversation.uuid)}
             onPointerEnter={() => setIsHovered(true)}
             onPointerLeave={() => setIsHovered(false)}
+            textOverflow="ellipsis"
+            overflow="hidden"
+            whiteSpace="nowrap"
         >
             <Text fontSize="1rem" flex={1} textAlign="center">
                 {conversation.summary ?? conversation.title}

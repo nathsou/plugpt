@@ -21,6 +21,7 @@ export const Conversation: FC = () => {
             openai.createCompletion({
                 model: 'text-curie-001',
                 temperature: 0.2,
+                max_tokens: 10,
                 prompt: dedent`
                     You are a conversation title generator.
                     You are given the first message of a new conversation and you must generate a very short title for it,
