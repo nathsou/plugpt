@@ -1,4 +1,4 @@
-import { Button, Card, IconButton, Pane, PlusIcon, Text, TrashIcon, majorScale } from "evergreen-ui";
+import { Button, Card, IconButton, Pane, PlusIcon, Text, TrashIcon, majorScale, minorScale } from "evergreen-ui";
 import { FC, useState } from "react";
 import { Conversation, useStore } from "../store";
 
@@ -15,23 +15,30 @@ const ConversationItem: FC<{ conversation: Conversation }> = ({ conversation }) 
             display="flex"
             justifyContent="center"
             alignItems="center"
+            position="relative"
             height="3rem"
             marginY={majorScale(1)}
             cursor="pointer"
             onClick={() => setConversationUuid(conversation.uuid)}
             onPointerEnter={() => setIsHovered(true)}
             onPointerLeave={() => setIsHovered(false)}
-            textOverflow="ellipsis"
-            overflow="hidden"
-            whiteSpace="nowrap"
         >
-            <Text fontSize="1rem" flex={1} textAlign="center">
+            <Text
+                fontSize="1rem"
+                flex={1}
+                textAlign="center"
+                textOverflow="ellipsis"
+                overflow="hidden"
+                whiteSpace="nowrap"
+                margin={majorScale(1)}
+            >
                 {conversation.summary ?? conversation.title}
             </Text>
             {isHovered && <IconButton
                 icon={TrashIcon}
+                position="absolute"
+                right={minorScale(1)}
                 size="small"
-                marginRight={majorScale(1)}
                 onClick={(e: any) => {
                     e.stopPropagation();
                     removeConversation(conversation.uuid);

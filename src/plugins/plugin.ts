@@ -79,7 +79,9 @@ export const plugins = new class {
                 role: 'system',
                 content: activePlugins.length > 0 ? dedent`
                     ${prefix}
-                    If needed, the following commands are available to answer questions:
+                    If needed, use commands to help you answer questions.
+                    if a '@' symbol followed by the name of a command is found in the question, the command must be used in your response.
+                    Available commands:
                     ${commands}
                 ` : prefix,
             },

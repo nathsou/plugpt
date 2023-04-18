@@ -108,6 +108,7 @@ export const Message: FC<Props> = ({ message }) => {
             onPointerEnter={() => setIsHovered(true)}
             onPointerLeave={() => setIsHovered(false)}
             justifyContent="center"
+            position="relative"
         >
             <Pane display="flex" flexBasis="60rem" flexGrow={0}>
                 <Avatar
@@ -122,6 +123,8 @@ export const Message: FC<Props> = ({ message }) => {
                     <IconButton
                         icon={TrashIcon}
                         size="small"
+                        position="absolute"
+                        right={majorScale(2)}
                         onClick={() => removeMessage(conversationUuid, message.uuid)}
                     /> :
                     null
