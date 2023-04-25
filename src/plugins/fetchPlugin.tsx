@@ -51,7 +51,8 @@ export const fetchPlugin: GPTPlugin = {
             ],
         });
 
-        return completion.data.choices[0]?.message?.content ?? '';
+        const result = completion.data.choices[0]?.message?.content ?? '';
+        return { result, shouldPersist: true };
     },
     renderResult: ({ key, subst }) => {
         if (!subst.result) {

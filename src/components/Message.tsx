@@ -37,7 +37,7 @@ export const Message: FC<Props> = ({ message }) => {
                     }
 
                     const pluginState = pluginsState[plugin.id] ?? {};
-                    const { result } = await plugins.runCommand(
+                    const { result, persistResult } = await plugins.runCommand(
                         command,
                         question.content,
                         pluginState
@@ -46,6 +46,7 @@ export const Message: FC<Props> = ({ message }) => {
                     return {
                         pluginId: plugin.id,
                         result,
+                        persistResult,
                         start: command.startIndex,
                         end: command.endIndex,
                         query: command.query,
@@ -157,7 +158,11 @@ const SubstitutedString: FC<SubstitutedStringProps> = ({ input, substitutions })
 
         // Add the text before the substitution
         if (start > lastIndex) {
-            result.push(<ReactMarkdown key={index}>{input.slice(lastIndex, start)}</ReactMarkdown>);
+            result.push(
+                <Pane width="100%" key={index}>
+                    <ReactMarkdown>{input.slice(lastIndex, start)}</ReactMarkdown>
+                </Pane>
+            );
             index += 1;
         }
 
@@ -169,8 +174,14 @@ const SubstitutedString: FC<SubstitutedStringProps> = ({ input, substitutions })
 
     // Add the remaining text
     if (lastIndex < input.length) {
-        result.push(<ReactMarkdown key={index}>{input.slice(lastIndex)}</ReactMarkdown>);
+        result.push(
+            <Pane width="100%" key="last">
+                <ReactMarkdown>{input.slice(lastIndex)}</ReactMarkdown>
+            </Pane>
+        );
     }
 
-    return <Pane color="gray900" display="flex" flexWrap="wrap" flex="1" maxWidth="100%">{result}</Pane>;
+    return <Pane color="gray900" display="flex" flexWrap="wrap" flex="1" maxWidth="100%">
+        {result}
+    </Pane>;
 };

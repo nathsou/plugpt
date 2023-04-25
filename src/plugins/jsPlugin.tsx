@@ -8,9 +8,10 @@ export const jsPlugin: GPTPlugin = {
     name: 'JavaScript Evaluator',
     command: 'JS',
     humanDescription: 'Evaluate JavaScript code',
-    aiDescription: dedent`@JS(<input>): executes a JavaScript program in a web worker,
-    the program should return a function which efficiently returns the expected result.
-    Graphics are returned as { kind: 'image', dims: [<width>, <height>], pixels: <array of hex pixels> }`,
+    aiDescription: dedent`
+        @JS(<input>): executes a JavaScript program in a web worker,
+        the program should return a function which efficiently returns the expected result.
+    `,
     examples: [
         {
             question: 'What is the terminal velocity of a 10kg object falling from a height of 100m, ignoring air resistance?',
@@ -20,29 +21,9 @@ export const jsPlugin: GPTPlugin = {
             question: 'What is the date?',
             answer: `Today is the @JS(() => new Date().toLocaleDateString())`
         },
-        {
-            question: 'Show an empty pink rectangle',
-            answer: dedent`@JS(
-                () => {
-                    const width = 400;
-                    const height = 300;
-                    const offscreenCanvas = new OffscreenCanvas(width, height);
-                    const ctx = offscreenCanvas.getContext('2d');
-                    ctx.fillStyle = 'pink';
-                    ctx.fillRect(0, 0, width, height);
-                    const pixels = Array.from(ctx.getImageData(0, 0, width, height).data);
-                    
-                    return {
-                      kind: 'image',
-                      dims: [width, height],
-                      pixels,
-                    };
-                }
-            )`
-        },
     ],
     initialState: { enabled: true },
-    run: ({ query }) => evaluateCode(query),
+    run: async ({ query }) => ({ result: await evaluateCode(query), shouldPersist: true }),
     renderResult,
 };
 

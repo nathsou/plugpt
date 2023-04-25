@@ -2,11 +2,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { globalContext } from './OpenAIProvider';
 import { fetchPlugin } from './plugins/fetchPlugin';
 import { googlePlugin } from './plugins/googlePlugin';
+import { htmlPlugin } from './plugins/htmlPlugin';
 import { jsPlugin } from './plugins/jsPlugin';
 import { GPTPluginState, plugins } from './plugins/plugin';
-import { globalContext } from './OpenAIProvider';
 
 type QuestionMessage = {
     type: 'question',
@@ -25,6 +26,7 @@ export type PluginSubstitution = {
     end: number,
     query: string,
     result?: unknown,
+    persistResult: boolean,
 };
 
 export type ConversationMessage = {
@@ -72,6 +74,7 @@ type Actions = {
 export type Store = State & Actions;
 
 plugins.register(jsPlugin);
+plugins.register(htmlPlugin);
 plugins.register(googlePlugin);
 plugins.register(fetchPlugin);
 
@@ -208,13 +211,10 @@ export const useStore = create<Store>()(immer(persist(set => {
                 if (m.type === 'answer') {
                     return {
                         ...m,
-                        substitutions: m.substitutions.map(s => ({
-                            ...s,
-                            result:
-                                s.result !== undefined && JSON.stringify(s.result).length > 1000 ?
-                                    undefined :
-                                    s.result,
-                        })),
+                        substitutions: m.substitutions.map(s => {
+                            const shouldPersist = s.persistResult && (s.result !== undefined && JSON.stringify(s.result).length < 1000);
+                            return { ...s, result: shouldPersist ? s.result : undefined };
+                        }),
                     };
                 }
 

@@ -28,7 +28,7 @@ export type GPTPlugin<
         answer: string,
     }[],
     initialState: State,
-    run: (context: { query: string, question: string }, state: State) => Promise<string>,
+    run: (context: { query: string, question: string }, state: State) => Promise<{ result: string, shouldPersist: boolean }>,
     renderResult?: (props: GPTPluginRenderResultProps<State>) => JSX.Element,
     renderSettings?: (props: GPTPluginRenderSettingsProps<State>) => JSX.Element,
 };
@@ -93,11 +93,12 @@ export const plugins = new class {
         { command, query }: Command,
         question: string,
         state: GPTPluginState,
-    ): Promise<{ pluginId: string, result: string }> {
+    ): Promise<{ pluginId: string, result: string, persistResult: boolean }> {
         const plugin = this.getPluginByCommand(command);
 
         if (plugin) {
-            return { pluginId: plugin.id, result: await plugin.run({ query, question }, state) };
+            const { result, shouldPersist } = await plugin.run({ query, question }, state);
+            return { pluginId: plugin.id, result, persistResult: shouldPersist };
         } else {
             return Promise.reject(`Unknown command: ${command}`);
         }
